@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSE-306 Full Lab Quiz Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .quiz-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 700px;
+      width: 100%;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .options label {
+      display: block;
+      margin: 0.5rem 0;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background-color: #007BFF;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .result {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <button onclick="nextQuestion()">Next</button>
+      <div class="result" id="result"></div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [ 
+    { question: "Assembly program starts with:", options: ["main()", "#include", ".data and .code", "end"], answer: ".data and .code" },
+      { question: "C program always contains:", options: ["main() function", ".code segment", "INT 21H", "loop label"], answer: "main() function" },
+      { question: "Which is not an assembler directive?", options: [".data", ".code", ".model", "PRINT"], answer: "PRINT" },
+      { question: ".data segment is used for:", options: ["Instructions", "Registers", "Declaring variables and strings", "Stacks"], answer: "Declaring variables and strings" },
+      { question: ".code segment contains:", options: ["Program instructions", "Header", "Constants", "Output"], answer: "Program instructions" },
+      { question: "AX register is:", options: ["Segment register", "Flag", "A general-purpose register", "Interrupt"], answer: "A general-purpose register" },
+      { question: "What is the purpose of INT 21h?", options: ["DOS interrupt for I/O", "Exit loop", "Restart PC", "Store file"], answer: "DOS interrupt for I/O" },
+      { question: "Which part of AX is the lower byte?", options: ["AH", "AL", "BH", "BL"], answer: "AL" },
+      { question: "MOV AL, 0 does what?", options: ["Sets AL to 1", "Copies memory", "Clears AL", "Adds 0 to AL"], answer: "Clears AL" },
+      { question: "To print a character, which AH value is used?", options: ["01h", "09h", "4Ch", "02h"], answer: "02h" },
+      { question: "ADD AL, BL adds:", options: ["BL to AL", "AL to BL", "AX to BX", "CL to AL"], answer: "BL to AL" },
+      { question: "Which register stores the remainder after DIV?", options: ["AX", "CX", "DX", "BX"], answer: "DX" },
+      { question: "Which segment holds message strings?", options: [".code", ".stack", ".data", ".bss"], answer: ".data" },
+      { question: "MOV DL, 'A' means:", options: ["Store character A", "Print A", "Load ASCII of A into DL", "Clear DL"], answer: "Load ASCII of A into DL" },
+      { question: "AH = 09h does what?", options: ["Display a string", "Read input", "Exit", "Print char"], answer: "Display a string" },
+      { question: "ASCII of A is:", options: ["97", "65", "66", "64"], answer: "65" },
+      { question: "To convert 'a' to 'A':", options: ["Add 32", "Use XOR", "Subtract 32", "Add 16"], answer: "Subtract 32" },
+      { question: "ASCII difference between lowercase and uppercase:", options: ["32", "16", "64", "8"], answer: "32" },
+      { question: "CMP AL, 'a' compares:", options: ["DL", "AH", "AL with ASCII of a", "AL with BL"], answer: "AL with ASCII of a" },
+      { question: "Conditional jump for equal:", options: ["JNE", "JE", "JMP", "JG"], answer: "JE" },
+      { question: "If AX = -5, then:", options: ["Zero", "Positive", "Negative", "Overflow"], answer: "Negative" },
+      { question: "CMP followed by JL means:", options: ["Jump if above", "Jump if less", "Jump if zero", "Jump if not equal"], answer: "Jump if less" },
+      { question: "AH = 01h is used to:", options: ["Take single character input", "Exit program", "Check flag", "Display string"], answer: "Take single character input" },
+      { question: "Which register is checked for signed number?", options: ["AX", "CF", "ZF", "SF (Sign Flag)"], answer: "SF (Sign Flag)" },
+      { question: "CMP AX, BX sets:", options: ["Flags", "Jump", "Code", "Data"], answer: "Flags" },
+      { question: "Even number check uses:", options: ["CMP with 2", "MOD 2", "ADD 2", "XOR 1"], answer: "MOD 2" },
+      { question: "AND operation with 1 helps:", options: ["Check LSB", "Clear AX", "Set AH", "Shift right"], answer: "Check LSB" },
+      { question: "MOV DL, 10 means:", options: ["NULL", "TAB", "Load new line (LF)", "Carriage Return"], answer: "Load new line (LF)" },
+      { question: "After CMP, which jump is for not equal?", options: ["JE", "JG", "JNE", "JMP"], answer: "JNE" },
+      { question: "To skip a block if odd:", options: ["JL", "JE (after AND with 1)", "JMP", "JNZ"], answer: "JE (after AND with 1)" },
+      { question: "AH = 4Ch is used for:", options: ["Exit program", "String input", "Loop", "Push stack"], answer: "Exit program" },
+      { question: "XOR AX, AX does what?", options: ["Set AX to 1", "Clears AX", "Shift left", "Multiply"], answer: "Clears AX" },
+      { question: "What does LEA do?", options: ["Exit", "Loads effective address", "Compare", "Shift"], answer: "Loads effective address" },
+      { question: "What does JMP do?", options: ["Unconditional jump", "Compare registers", "Exit", "Push stack"], answer: "Unconditional jump" },
+      { question: "Carry Flag is set when:", options: ["Memory overflow", "Signed addition overflow", "Bit rotate", "Arithmetic overflow in unsigned addition"], answer: "Arithmetic overflow in unsigned addition" },
+      { question: "PUSH AX does:", options: ["Saves AX on stack", "Clears AX", "Multiplies AX", "Moves AX to BX"], answer: "Saves AX on stack" },
+      { question: "POP BX does:", options: ["Deletes stack", "Pushes AX", "Restores top of stack into BX", "Clears BX"], answer: "Restores top of stack into BX" },
+      { question: "Which register pair holds address?", options: ["AX & BX", "SI & DI", "CX & DX", "AH & AL"], answer: "SI & DI" },
+      { question: "INT 10h is used for:", options: ["Keyboard input", "Math ops", "Stack", "Video display functions"], answer: "Video display functions" },
+      { question: "DEC AX:", options: ["AX = AX - 1", "AX = AX + 1", "Clear AX", "Move to BX"], answer: "AX = AX - 1" },
+      { question: "SHL AL, 1:", options: ["Divide AL by 2", "Multiply AL by 2", "Clear AL", "Shift right"], answer: "Multiply AL by 2" },
+      { question: "SAR instruction:", options: ["Add and rotate", "Shift left", "Logical shift right", "Arithmetic shift right"], answer: "Arithmetic shift right" },
+      { question: "OR operation on same values:", options: ["Clears value", "Inverts bits", "Keeps same value", "ANDs it"], answer: "Keeps same value" },
+      { question: "TEST AL, 1 checks:", options: ["MSB", "LSB is 1 or 0", "Value is zero", "Compare registers"], answer: "LSB is 1 or 0" },
+      { question: "NEG AX:", options: ["AX = -AX", "AX = AX + 1", "AX = AX * 2", "AX = 0"], answer: "AX = -AX" },
+      { question: "LODS is used to:", options: ["Store byte", "Print string", "Load string element into AL", "Exit"], answer: "Load string element into AL" },
+      { question: "STOS is used to:", options: ["Shift", "Store string element from AL", "Exit", "Load address"], answer: "Store string element from AL" },
+      { question: "REP prefix is used to:", options: ["Repeat operation", "Reset program", "Register operation", "Return address"], answer: "Repeat operation" },
+      { question: "To terminate string in AH=09h:", options: ["NULL", "EOF", "$ symbol", "\\n"], answer: "$ symbol" },
+      { question: "MOVSB:", options: ["Move byte from DS:SI to ES:DI", "Move stack", "Shift byte", "Set flag"], answer: "Move byte from DS:SI to ES:DI" }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let incorrectAnswers = [];
+
+    function showQuestion() {
+      const currentQuestion = quizData[currentQuestionIndex];
+      document.getElementById("question").textContent = `Q${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+      const optionsContainer = document.getElementById("options");
+      optionsContainer.innerHTML = "";
+
+      currentQuestion.options.forEach((option, index) => {
+        const optionElement = document.createElement("label");
+        optionElement.innerHTML = `
+          <input type="radio" name="option" value="${option}" /> ${option}
+        `;
+        optionsContainer.appendChild(optionElement);
+      });
+
+      document.getElementById("result").textContent = "";
+    }
+
+    function nextQuestion() {
+      const selectedOption = document.querySelector('input[name="option"]:checked');
+      if (selectedOption) {
+        const userAnswer = selectedOption.value;
+        userAnswers.push(userAnswer);
+
+        if (userAnswer !== quizData[currentQuestionIndex].answer) {
+          incorrectAnswers.push({
+            question: quizData[currentQuestionIndex].question,
+            userAnswer: userAnswer,
+            correctAnswer: quizData[currentQuestionIndex].answer
+          });
+        }
+      } else {
+        alert("Please select an answer!");
+        return;
+      }
+
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex < quizData.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      const resultContainer = document.getElementById("quiz");
+      resultContainer.innerHTML = "<h2>Your Quiz Results</h2>";
+
+      const score = userAnswers.filter((answer, index) => answer === quizData[index].answer).length;
+      resultContainer.innerHTML += `<p>Your Score: ${score} / ${quizData.length}</p>`;
+
+      if (incorrectAnswers.length > 0) {
+        resultContainer.innerHTML += "<h3>Incorrect Answers:</h3>";
+        incorrectAnswers.forEach(item => {
+          resultContainer.innerHTML += `
+            <p><strong>Question:</strong> ${item.question}<br />
+            <strong>Your Answer:</strong> ${item.userAnswer}<br />
+            <strong>Correct Answer:</strong> ${item.correctAnswer}</p>
+          `;
+        });
+      } else {
+        resultContainer.innerHTML += "<p>Congratulations! You got all the answers correct!</p>";
+      }
+    }
+
+    // Start the quiz
+    showQuestion();
+  </script>
+</body>
+</html>
