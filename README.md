@@ -1,2 +1,2 @@
-# Assembly--Lab-Quiz
+# Assembly-Lab-Quiz
 Visit- https://nazmussakibshohan.github.io/Assembly-quiz/
